@@ -1,100 +1,106 @@
-# Build CLI AI Agent with golang
+# CLI AI Agent in Go
+This project demonstrates how to build a command-line AI agent using Go and the OpenRouter API.
 
-how to do it step by step
+---
 
-1 - go mod init
+## Setup
 
-3 - vim .env
+1. **Initialize Go module**  
+```bash
+go mod init your_project_name
+```
 
-4 - create open router api key paste in .env
-as OPENROUTER_API_KEY
+2. **Create `.env` file**  
+```bash
+vim .env
+```  
+Add your OpenRouter API key:  
+```
+OPENROUTER_API_KEY=your_api_key_here
+```
 
-5 - go get "github.com/openai/openai-go/v2"
+3. **Install OpenAI Go SDK**  
+```bash
+go get github.com/openai/openai-go/v2
+```
 
-6 - vim main.go
+4. **Create `main.go`**  
+```bash
+vim main.go
+```  
+- Define OpenRouter API URL.  
+- Load API key from `.env` and check if defined.  
+- Create LLM client using OpenAI SDK with base URL and API key.  
+- Create a `messages` array and append your query using `openai.UserMessage`.  
+- Choose a model and define chat completion parameters.  
+- Create a `ctx` and call `client.ChatCompletions.New(ctx, params)`.  
+- Print the AI response.
 
-7 - defined url for the openrouter api
-define api key from openrouter
+5. **Export environment variables**  
+```bash
+export $(cat .env | xargs)
+```
 
-check if api is not defiend
-
-create the llm client via openai sdk new client
-provide it with base url of openrouter and api key
-
-create the messages array
-
-append your query to the messages array
-via openai.usermessage
-
-choose a model and provide its key
-
-define chat completion params
-
-define ctx 
-
-call a chat completion via client.
-chat.completins.new
-
-provide the context and the params
-
-print the output
-
-export env vars -> `export $(cat .env | xargs)`
-
-run the first version
-
+6. **Run**  
+```bash
 go run main.go
+```
 
+---
 
-second version will be creating a loop
-waiting for input and respond from that input
+## Version 2: Interactive Chat
 
-first we create a scanner via
-`bufio.newscanner()` and we give it the 
-stdin which is the standered input
+Enhance the CLI to wait for user input in a loop:
 
-we print a symbol to let us know we are wainting
-for user input like `fmt.print(">")`
+- Create a scanner:  
+```go
+scanner := bufio.NewScanner(os.Stdin)
+```
 
-then we check if we have scan err
-`if !scanner.scan()`
-we break the loop
+- Print a prompt symbol:  
+```go
+fmt.Print(">")
+```
 
-we define the input which will be the text
-scanned `scanner.text` without the spaces
+- Read input:  
+```go
+if !scanner.Scan() { break }
+input := strings.TrimSpace(scanner.Text())
+if input == "" { continue }
+```
 
-`strings.trimspace(scanner.text)`
+- Append input to `messages` array.  
+- Send chat completion request.  
+- Print AI response.  
+- Loop back for the next input.
 
-if that is empty we ignore via continue
+---
 
-then if not we append to the params messages array
+## Version 3: Memory and Colors
 
-we then send the chat completion request
+Enhance further with:
 
-we check for err and then print the response
+- Append AI response to `messages`.  
+- Print message count.  
+- Limit `messages` array to last 4 messages if it grows too large.  
+- Add colors with `fatih/color`:  
+```bash
+go get github.com/fatih/color
+```
 
-we run version 2 (interactive chat cli agent)
+- Use colors to differentiate:  
+  - User queries  
+  - AI responses  
+  - Other info  
 
-third version:
+This improves readability and visual distinction in the chat.
 
-we add the response of the llm to the messages array
+---
 
-we then print the messages count
+## Run
 
-we add a check if messages array become too much 
-we clean it and get only the last 4 messages
+```bash
+go run main.go
+```
 
-then we contineu the chat
-
-we add color via faith color library
-
-`go get "github.com/fatih/color"`
-
-we add color by wrapping our strings in print
-statement with color.colorstring(the string)
-
-this way we can have better look
-and we can understand the ai response better
-by giving it different color that our query
-
-and other info as well
+Enjoy your interactive CLI AI agent!
