@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
@@ -25,22 +27,38 @@ func main() {
 
 	messages := []openai.ChatCompletionMessageParamUnion{}
 
-	messages = append(messages, openai.UserMessage("what model are you?"))
-
-	model := "x-ai/grok-4-fast:free" 
+	model := "x-ai/grok-4-fast:free"
 
 	params := openai.ChatCompletionNewParams{
-		Model: model,
+		Model:    model,
 		Messages: messages,
 	}
-	
+
 	ctx := context.Background()
 
-	res, err := client.Chat.Completions.New(ctx, params)
-	if err != nil {
-		log.Fatal(err)
-	}
+	scanner := bufio.NewScanner(os.Stdin)
 
-	fmt.Println(res.Choices[0].Message.Content)
+	for {
+		fmt.Print("> ")
+
+		if !scanner.Scan() {
+			break
+		}
+
+		input := strings.TrimSpace(scanner.Text())
+		if input == "" {
+			continue
+		}
+
+		params.Messages = append(params.Messages, openai.UserMessage(input))
+
+		res, err := client.Chat.Completions.New(ctx, params)
+		if err != nil {
+			log.Println(err)
+		}
+
+		fmt.Println(res.Choices[0].Message.Content)
+
+	}
 
 }
